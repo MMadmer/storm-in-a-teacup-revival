@@ -1,0 +1,11 @@
+*
+!.gitignore
+!CMakeLists.txt
+!include/
+!include/**
+!src/
+!src/**
+!Mods/
+Mods/*
+!Mods/Mods.ini
+!Mods/README.md
