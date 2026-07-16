@@ -59,6 +59,7 @@ set_target_properties(PerformanceOptimizer PROPERTIES
 add_library(GraphicsEnhancer SHARED
     Mods/GraphicsEnhancer/GraphicsEnhancer.cpp
     Mods/GraphicsEnhancer/ModernLighting.cpp
+    Mods/GraphicsEnhancer/ModernRenderer.cpp
 )
 target_include_directories(GraphicsEnhancer PRIVATE include)
 target_link_libraries(GraphicsEnhancer PRIVATE d3d9)
