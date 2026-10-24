@@ -56,7 +56,7 @@ void __cdecl Log(const wchar_t* modName, const wchar_t* message)
         FILE_ATTRIBUTE_NORMAL,
         nullptr
     );
-    if (!file || file == INVALID_HANDLE_VALUE)
+    if (file == INVALID_HANDLE_VALUE)
     {
         return;
     }
@@ -76,9 +76,22 @@ void __cdecl Log(const wchar_t* modName, const wchar_t* message)
         message ? message : L""
     );
 
-    const auto byteCount = static_cast<DWORD>(std::wcslen(line) * sizeof(wchar_t));
-    DWORD written{};
-    WriteFile(file, line, byteCount, &written, nullptr);
+    char utf8Line[sizeof(line) * 2]{};
+    const auto byteCount = WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        line,
+        -1,
+        utf8Line,
+        static_cast<int>(sizeof(utf8Line)),
+        nullptr,
+        nullptr
+    );
+    if (byteCount > 1)
+    {
+        DWORD written{};
+        WriteFile(file, utf8Line, static_cast<DWORD>(byteCount - 1), &written, nullptr);
+    }
     CloseHandle(file);
 }
 
@@ -259,26 +272,6 @@ extern "C" __declspec(dllexport) void __cdecl StormModLoader_NotifyDirect3D9Crea
             notify(direct3D);
         }
     }
-}
-
-extern "C" __declspec(dllexport) void* __cdecl StormModLoader_CreateDirect3D9(
-    unsigned int sdkVersion
-)
-{
-    for (const auto& mod : g_loadedMods)
-    {
-        const auto create = reinterpret_cast<void*(__cdecl*)(unsigned int)>(
-            GetProcAddress(mod.module, "StormMod_CreateDirect3D9")
-        );
-        if (create)
-        {
-            if (const auto direct3D = create(sdkVersion))
-            {
-                return direct3D;
-            }
-        }
-    }
-    return nullptr;
 }
 
 

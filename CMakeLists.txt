@@ -46,32 +46,42 @@ set_target_properties(ExpandedSettings PROPERTIES
 )
 
 add_library(PerformanceOptimizer SHARED
+    Mods/PerformanceOptimizer/GamePatches.cpp
     Mods/PerformanceOptimizer/PerformanceOptimizer.cpp
 )
 target_include_directories(PerformanceOptimizer PRIVATE include)
-target_link_libraries(PerformanceOptimizer PRIVATE d3d9 dxgi)
 set_target_properties(PerformanceOptimizer PROPERTIES
     PREFIX ""
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/Mods/PerformanceOptimizer"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Mods/PerformanceOptimizer"
 )
 
-add_library(GraphicsEnhancer SHARED
-    Mods/GraphicsEnhancer/GraphicsEnhancer.cpp
-    Mods/GraphicsEnhancer/ModernLighting.cpp
-    Mods/GraphicsEnhancer/ModernRenderer.cpp
+add_library(VideoCrashFix SHARED
+    Mods/VideoCrashFix/VideoCrashFix.cpp
 )
-target_include_directories(GraphicsEnhancer PRIVATE include)
-target_link_libraries(GraphicsEnhancer PRIVATE d3d9)
-set_target_properties(GraphicsEnhancer PROPERTIES
+target_include_directories(VideoCrashFix PRIVATE include)
+set_target_properties(VideoCrashFix PROPERTIES
     PREFIX ""
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/Mods/GraphicsEnhancer"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Mods/GraphicsEnhancer"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/Mods/VideoCrashFix"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Mods/VideoCrashFix"
+)
+
+# Development-only automated benchmark; disabled in Mods.ini unless tools/bench.ps1 runs it.
+add_library(StormBench SHARED
+    Mods/StormBench/StormBench.cpp
+)
+target_include_directories(StormBench PRIVATE include)
+target_link_libraries(StormBench PRIVATE d3d9 winmm gdi32 user32)
+set_target_properties(StormBench PROPERTIES
+    PREFIX ""
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/Mods/StormBench"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Mods/StormBench"
 )
 
 if(MSVC)
-    foreach(target StormModLoader StormModLauncher D3D9Proxy ExpandedSettings PerformanceOptimizer GraphicsEnhancer)
-        target_compile_options(${target} PRIVATE /W4 /permissive- /EHsc /utf-8)
+    foreach(target StormModLoader StormModLauncher D3D9Proxy ExpandedSettings PerformanceOptimizer VideoCrashFix StormBench)
+        target_compile_options(${target} PRIVATE /W4 /permissive- /EHsc /utf-8 /Zi)
+        target_link_options(${target} PRIVATE /DEBUG /OPT:REF /OPT:ICF /MAP)
         set_property(TARGET ${target} PROPERTY
             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
         )

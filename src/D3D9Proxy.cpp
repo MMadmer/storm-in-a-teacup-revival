@@ -8,14 +8,12 @@
 namespace
 {
 using Direct3DCreate9Fn = IDirect3D9*(WINAPI*)(UINT);
-using CreateDirect3D9OverrideFn = void*(__cdecl*)(UINT);
 using NotifyDirect3D9CreatedFn = void(__cdecl*)(void*);
 
 INIT_ONCE g_initializeOnce = INIT_ONCE_STATIC_INIT;
 HMODULE g_realD3D9{};
 HMODULE g_loader{};
 Direct3DCreate9Fn g_realDirect3DCreate9{};
-CreateDirect3D9OverrideFn g_createDirect3D9Override{};
 NotifyDirect3D9CreatedFn g_notifyDirect3D9Created{};
 
 std::wstring GetExecutableDirectory()
@@ -46,7 +44,7 @@ bool WaitForLoaderReady()
         const auto readyEvent = OpenEventW(SYNCHRONIZE, FALSE, eventName);
         if (readyEvent)
         {
-            const auto result = WaitForSingleObject(readyEvent, 5000);
+            const auto result = WaitForSingleObject(readyEvent, 30000);
             CloseHandle(readyEvent);
             return result == WAIT_OBJECT_0;
         }
@@ -87,19 +85,10 @@ BOOL CALLBACK InitializeProxy(PINIT_ONCE, void*, void**)
     {
         g_loader = GetModuleHandleW(L"StormModLoader.dll");
     }
-    if (!WaitForLoaderReady())
+
+    // A missing or stalled loader must not prevent the game from creating a native device.
+    if (g_loader && WaitForLoaderReady())
     {
-        return FALSE;
-    }
-    if (!g_loader)
-    {
-        g_loader = GetModuleHandleW(L"StormModLoader.dll");
-    }
-    if (g_loader)
-    {
-        g_createDirect3D9Override = reinterpret_cast<CreateDirect3D9OverrideFn>(
-            GetProcAddress(g_loader, "StormModLoader_CreateDirect3D9")
-        );
         g_notifyDirect3D9Created = reinterpret_cast<NotifyDirect3D9CreatedFn>(
             GetProcAddress(g_loader, "StormModLoader_NotifyDirect3D9Created")
         );
@@ -116,13 +105,7 @@ extern "C" IDirect3D9* WINAPI Direct3DCreate9(UINT sdkVersion)
         return nullptr;
     }
 
-    auto* direct3D = g_createDirect3D9Override
-        ? static_cast<IDirect3D9*>(g_createDirect3D9Override(sdkVersion))
-        : nullptr;
-    if (!direct3D)
-    {
-        direct3D = g_realDirect3DCreate9(sdkVersion);
-    }
+    auto* direct3D = g_realDirect3DCreate9(sdkVersion);
     if (direct3D && g_notifyDirect3D9Created)
     {
         g_notifyDirect3D9Created(direct3D);
@@ -130,11 +113,40 @@ extern "C" IDirect3D9* WINAPI Direct3DCreate9(UINT sdkVersion)
     return direct3D;
 }
 
+namespace
+{
+// Storm.exe has no DPI manifest, so on a scaled display Windows renders it at the logical resolution and
+// stretches the result: a blurry image, small intro windows and a mouse confined to part of the screen.
+// The game imports d3d9.dll statically, so this runs before it creates any window.
+void EnableDpiAwareness()
+{
+    const auto user32 = GetModuleHandleW(L"user32.dll");
+    if (!user32)
+    {
+        return;
+    }
+    using SetContextFn = BOOL(WINAPI*)(DPI_AWARENESS_CONTEXT);
+    using SetAwareFn = BOOL(WINAPI*)();
+    if (const auto setContext = reinterpret_cast<SetContextFn>(
+            GetProcAddress(user32, "SetProcessDpiAwarenessContext"));
+        setContext && setContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
+    {
+        return;
+    }
+    if (const auto setAware = reinterpret_cast<SetAwareFn>(GetProcAddress(user32, "SetProcessDPIAware")))
+    {
+        setAware();
+    }
+}
+}
+
+
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, void*)
 {
     if (reason == DLL_PROCESS_ATTACH)
     {
         DisableThreadLibraryCalls(instance);
+        EnableDpiAwareness();
     }
     return TRUE;
 }

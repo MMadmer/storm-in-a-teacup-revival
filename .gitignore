@@ -1,11 +1,24 @@
+# The repository lives inside the game folder, so everything is ignored except the mod sources.
 *
 !.gitignore
+!LICENSE
+!README.md
 !CMakeLists.txt
 !include/
 !include/**
 !src/
 !src/**
+!tools/
+tools/*
+!tools/bench.ps1
+!tools/po_symbols.py
+
 !Mods/
 Mods/*
 !Mods/Mods.ini
 !Mods/README.md
+!Mods/*/
+!Mods/*/*.cpp
+!Mods/*/*.h
+!Mods/*/README.md
+!Mods/PerformanceOptimizer/PerformanceOptimizer.ini

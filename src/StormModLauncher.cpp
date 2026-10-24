@@ -116,7 +116,7 @@ bool WaitForLoaderReady(DWORD pid)
         UniqueHandle readyEvent(OpenEventW(SYNCHRONIZE, FALSE, eventName));
         if (readyEvent)
         {
-            return WaitForSingleObject(readyEvent.get(), 5000) == WAIT_OBJECT_0;
+            return WaitForSingleObject(readyEvent.get(), 30000) == WAIT_OBJECT_0;
         }
         Sleep(10);
     }
