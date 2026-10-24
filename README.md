@@ -4,89 +4,100 @@
 
 ## Русский
 
-Неофициальные моды и фиксы для «Буря в стакане» (1С, v1.0.147). Главное: **финальный ролик наконец
-досматривается до конца** и игра больше не падает на нём.
+Неофициальные моды и исправления для игры «Буря в стакане» (1С, версия 1.0.147). Главное исправление:
+**финальный ролик воспроизводится до конца**, игра больше не завершается с ошибкой.
 
-### Что внутри
+### Состав
 
-- **VideoCrashFix** — фикс финального ролика «Малиновый Джыдах, эпилог». Во всех версиях игры он падал через
-  пару секунд после начала из-за гонки потоков в видеодекодере `rk_theora.dll`, поэтому концовку было не
-  посмотреть, а прохождение не засчитывалось. Мод чинит это в памяти, файлы игры не меняются.
-- **ExpandedSettings** — в меню «Видео» добавлены режим экрана (в окне, полноэкранный, в окне без рамки),
-  вертикальная синхронизация и лимит FPS. Игра корректно работает на мониторах с масштабированием.
-- **PerformanceOptimizer** — оптимизация без потери качества картинки. На тестовом ноутбуке
-  (RTX 3070 Laptop, 2560×1440) около 250 FPS в полноэкранном режиме и около 175 в окне без рамки.
-- **Загрузчик модов** — `d3d9.dll` рядом с игрой подгружает моды из папки `Mods`, каждый включается
-  и выключается в `Mods\Mods.ini`.
+- **VideoCrashFix** — исправляет вылет на финальном ролике «Малиновый Джыдах, эпилог». Ролик прерывался через
+  несколько секунд во всех версиях игры из-за ошибки синхронизации потоков в видеодекодере `rk_theora.dll`,
+  поэтому концовку нельзя было досмотреть, а прохождение не засчитывалось. Исправление применяется в памяти,
+  файлы игры не изменяются.
+- **ExpandedSettings** — добавляет в меню «Видео» режим экрана (в окне, полноэкранный, в окне без рамки),
+  вертикальную синхронизацию и ограничение FPS. Обеспечивает чёткое изображение на мониторах с масштабированием.
+- **PerformanceOptimizer** — повышает производительность без снижения качества изображения. На тестовом
+  ноутбуке (RTX 3070 Laptop, 2560×1440): около 250 FPS в полноэкранном режиме и около 175 FPS в окне без рамки.
+- **AutoUpdate** — при запуске игры проверяет наличие новой версии и предлагает её установить. Загружаются
+  только изменённые файлы, настройки сохраняются.
+- **Загрузчик модов** — `d3d9.dll` в папке игры загружает моды из папки `Mods`. Каждый мод включается
+  и отключается в файле `Mods\Mods.ini`.
 
 ### Установка
 
-1. Скачай архив из [Releases](../../releases).
-2. Распакуй его в папку игры, туда, где лежит `Storm.exe`.
-3. Запускай игру как обычно.
+1. Скачайте архив со страницы [Releases](../../releases).
+2. Распакуйте его в папку игры, где находится `Storm.exe`.
+3. Запустите игру.
 
-Удаление: убери `d3d9.dll`, `StormModLoader.dll` и папку `Mods`. Файлы игры моды не трогают.
+Для удаления удалите `d3d9.dll`, `StormModLoader.dll` и папку `Mods`. Файлы игры моды не изменяют.
 
-Нужна версия игры 1.0.147. На других версиях моды сами отключаются, ничего не ломая.
-На ноутбуках с двумя видеокартами режим «Полноэкранный» заметно быстрее окна без рамки.
+Требуется версия игры 1.0.147. На других версиях моды отключаются автоматически.
+На ноутбуках с двумя видеокартами полноэкранный режим работает заметно быстрее окна без рамки.
 
 ### Сборка
 
-Visual Studio 2022+ (C++ для x86) и CMake 3.24+. Репозиторий рассчитан на то, что лежит прямо в папке игры:
-собранные DLL попадают туда, где их ждёт игра.
+Требуются Visual Studio 2022 или новее с инструментами C++ для x86 и CMake 3.24 или новее. Репозиторий
+предназначен для размещения в папке игры: собранные файлы сохраняются туда, где их ожидает игра.
 
 ```
 cmake -S . -B build -A Win32
 cmake --build build --config Release
+python tools/package_release.py
 ```
 
-`Mods\StormBench` и `tools\bench.ps1` — инструменты разработчика для замеров FPS, игрокам они не нужны.
+Порядок выпуска обновлений описан в [docs/AUTO_UPDATE.md](docs/AUTO_UPDATE.md). `Mods\StormBench`
+и `tools\bench.ps1` предназначены для замеров производительности при разработке.
 
 ### Лицензия
 
-Код модов — [MIT](LICENSE). Игра и её файлы в репозиторий не входят, права на них принадлежат правообладателям.
+Код модов распространяется по лицензии [MIT](LICENSE). Игра и её файлы в репозиторий не входят; права на них
+принадлежат правообладателям.
 
 ## English
 
-Unofficial mods and fixes for the Russian racing game "Буря в стакане" (Storm in a Teacup, 1C, v1.0.147).
-The headline: **the final video can finally be watched to the end** without crashing the game.
+Unofficial mods and fixes for the Russian racing game "Буря в стакане" (Storm in a Teacup, 1C, version 1.0.147).
+The main fix: **the final video plays to the end** and no longer crashes the game.
 
-### What's inside
+### Contents
 
-- **VideoCrashFix** — fixes the final video ("Малиновый Джыдах, эпилог"). In every release of the game it
-  crashed a few seconds in because of a thread race in the `rk_theora.dll` video decoder, so the ending was
-  unwatchable and the campaign never completed. The fix is applied in memory; no game files are changed.
-- **ExpandedSettings** — adds display mode (windowed, fullscreen, borderless), VSync and an FPS limit to the
-  Video menu. The game now renders correctly on scaled (HiDPI) displays.
-- **PerformanceOptimizer** — faster without touching image quality. On the test laptop (RTX 3070 Laptop,
-  2560×1440): about 250 FPS in fullscreen and about 175 in borderless.
-- **Mod loader** — `d3d9.dll` next to the game loads mods from the `Mods` folder; each one can be switched
-  on or off in `Mods\Mods.ini`.
+- **VideoCrashFix** — fixes the crash in the final video, "Малиновый Джыдах, эпилог". In every release of the
+  game the video stopped a few seconds in because of a thread synchronization error in the `rk_theora.dll` video
+  decoder, so the ending could not be watched and the campaign was never completed. The fix is applied in memory;
+  game files are not modified.
+- **ExpandedSettings** — adds display mode (windowed, fullscreen, borderless), vertical synchronization and an FPS
+  limit to the Video menu. Keeps the image sharp on scaled displays.
+- **PerformanceOptimizer** — improves performance without reducing image quality. On the test laptop
+  (RTX 3070 Laptop, 2560×1440): about 250 FPS in fullscreen and about 175 FPS in borderless mode.
+- **AutoUpdate** — checks for a new version when the game starts and offers to install it. Only changed files are
+  downloaded; settings are preserved.
+- **Mod loader** — `d3d9.dll` in the game folder loads the mods from the `Mods` folder. Each mod is enabled or
+  disabled in `Mods\Mods.ini`.
 
 ### Installation
 
-1. Download the archive from [Releases](../../releases).
-2. Unpack it into the game folder, next to `Storm.exe`.
-3. Start the game as usual.
+1. Download the archive from the [Releases](../../releases) page.
+2. Unpack it into the game folder that contains `Storm.exe`.
+3. Start the game.
 
-To uninstall, delete `d3d9.dll`, `StormModLoader.dll` and the `Mods` folder. Game files are never modified.
+To uninstall, delete `d3d9.dll`, `StormModLoader.dll` and the `Mods` folder. The mods do not modify game files.
 
-Game version 1.0.147 is required. On other versions the mods switch themselves off without breaking anything.
-On laptops with two GPUs, fullscreen mode is noticeably faster than borderless.
+Game version 1.0.147 is required. On other versions the mods disable themselves.
+On laptops with two graphics cards, fullscreen mode is noticeably faster than borderless mode.
 
 ### Building
 
-Visual Studio 2022+ (x86 C++ tools) and CMake 3.24+. The repository is meant to live inside the game folder,
-so the built DLLs land where the game expects them.
+Requires Visual Studio 2022 or newer with the x86 C++ tools and CMake 3.24 or newer. The repository is meant to
+be placed in the game folder: the built files are saved where the game expects them.
 
 ```
 cmake -S . -B build -A Win32
 cmake --build build --config Release
+python tools/package_release.py
 ```
 
-`Mods\StormBench` and `tools\bench.ps1` are developer tools for FPS measurements; players don't need them.
+The update release procedure is described in [docs/AUTO_UPDATE.md](docs/AUTO_UPDATE.md). `Mods\StormBench` and
+`tools\bench.ps1` are intended for performance measurements during development.
 
 ### License
 
-Mod code is licensed under [MIT](LICENSE). The game and its files are not included; all rights to them belong
+The mod code is licensed under [MIT](LICENSE). The game and its files are not included; all rights to them belong
 to their owners.

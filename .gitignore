@@ -8,10 +8,15 @@
 !include/**
 !src/
 !src/**
+!docs/
+!docs/AUTO_UPDATE.md
 !tools/
 tools/*
 !tools/bench.ps1
 !tools/po_symbols.py
+!tools/package_release.py
+!tools/update_test_server/
+!tools/update_test_server/**
 
 !Mods/
 Mods/*
@@ -20,5 +25,6 @@ Mods/*
 !Mods/*/
 !Mods/*/*.cpp
 !Mods/*/*.h
+!Mods/*/*.manifest
 !Mods/*/README.md
 !Mods/PerformanceOptimizer/PerformanceOptimizer.ini

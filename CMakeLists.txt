@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(StormModding LANGUAGES CXX)
+project(StormModding VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -66,6 +66,31 @@ set_target_properties(VideoCrashFix PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Mods/VideoCrashFix"
 )
 
+add_library(AutoUpdate SHARED
+    Mods/AutoUpdate/AutoUpdate.cpp
+    Mods/AutoUpdate/UpdateCommon.cpp
+)
+target_include_directories(AutoUpdate PRIVATE include)
+target_compile_definitions(AutoUpdate PRIVATE STORM_REVIVAL_VERSION="${PROJECT_VERSION}")
+target_link_libraries(AutoUpdate PRIVATE winhttp bcrypt user32)
+set_target_properties(AutoUpdate PROPERTIES
+    PREFIX ""
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/Mods/AutoUpdate"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Mods/AutoUpdate"
+)
+
+# Applies a staged update once the game has exited; the manifest keeps Windows from virtualizing or
+# auto-elevating it.
+add_executable(StormUpdater WIN32
+    Mods/AutoUpdate/StormUpdater.cpp
+    Mods/AutoUpdate/UpdateCommon.cpp
+    Mods/AutoUpdate/StormUpdater.manifest
+)
+target_link_libraries(StormUpdater PRIVATE bcrypt shell32 user32)
+set_target_properties(StormUpdater PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/Mods/AutoUpdate"
+)
+
 # Development-only automated benchmark; disabled in Mods.ini unless tools/bench.ps1 runs it.
 add_library(StormBench SHARED
     Mods/StormBench/StormBench.cpp
@@ -79,7 +104,7 @@ set_target_properties(StormBench PROPERTIES
 )
 
 if(MSVC)
-    foreach(target StormModLoader StormModLauncher D3D9Proxy ExpandedSettings PerformanceOptimizer VideoCrashFix StormBench)
+    foreach(target StormModLoader StormModLauncher D3D9Proxy ExpandedSettings PerformanceOptimizer VideoCrashFix AutoUpdate StormUpdater StormBench)
         target_compile_options(${target} PRIVATE /W4 /permissive- /EHsc /utf-8 /Zi)
         target_link_options(${target} PRIVATE /DEBUG /OPT:REF /OPT:ICF /MAP)
         set_property(TARGET ${target} PROPERTY
